@@ -1,0 +1,11 @@
+{
+  "name": "phoneback",
+  "version": "1.0.0",
+  "description": "A backend for the phonebook project from part 2",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "",
+  "license": "ISC"
+}
