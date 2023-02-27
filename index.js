@@ -31,6 +31,27 @@ let persons = [
   }
 ]
 
+if (process.argv.length == 5){
+  const person = new Person({
+  name: process.argv[3],
+  number: process.argv[4],
+  })
+
+  person.save().then(result => {
+  console.log('person saved!')
+  mongoose.connection.close()
+  })
+}
+else{
+  Person.find({}).then(result => {
+      result.forEach(note => {
+      console.log(note)
+      })
+      mongoose.connection.close()
+  })
+}
+
+
 app.get('/', (request, response) => {
 response.send('<h1>Phonebook Backend!</h1>')
 })
@@ -42,8 +63,9 @@ app.get('/api/info', (request, response) => {
 })
 
 app.get('/api/persons', (request, response) => {
-    console.log("...all phonebook entries")
-    response.json(persons)
+    Person.find({}).then(perons => {
+      response.json(persons)
+    })
 })
 
 app.get('/api/persons/:id', (request, response) => {
