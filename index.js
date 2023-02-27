@@ -1,7 +1,10 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
+const Person = require('./models/person')
 const app = express()
+const mongoose = require('mongoose')
 
 app.use(express.json())
 app.use(morgan('tiny'))
@@ -31,27 +34,6 @@ let persons = [
   }
 ]
 
-if (process.argv.length == 5){
-  const person = new Person({
-  name: process.argv[3],
-  number: process.argv[4],
-  })
-
-  person.save().then(result => {
-  console.log('person saved!')
-  mongoose.connection.close()
-  })
-}
-else{
-  Person.find({}).then(result => {
-      result.forEach(note => {
-      console.log(note)
-      })
-      mongoose.connection.close()
-  })
-}
-
-
 app.get('/', (request, response) => {
 response.send('<h1>Phonebook Backend!</h1>')
 })
@@ -69,17 +51,17 @@ app.get('/api/persons', (request, response) => {
 })
 
 app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    console.log(id)
-    const person = persons.find(person => person.id === id)
-    if (person){
-        console.log(person)
-        response.json(person)
-    }
-    else{
-        response.statusMessage = "Person not found..."
-        response.status(404).end()
-    }
+    Person.findById(request.params.id).then(person => {
+      response.json(person)
+    })
+    //if (person){
+    //    console.log(person)
+        //response.json(person)
+    //}
+    //else{
+    //    response.statusMessage = "Person not found..."
+    //    response.status(404).end()
+    //}
 })
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -102,17 +84,20 @@ if (!body.number){
 if (persons.find(person => person.name == body.name)){
   return response.status(400).json({error: "name already exists in book, names must be unique"})
 }
-const person = {
-    id: Math.floor(Math.random() * 9999999),
+const person = new Person({
     name: body.name,
     number: body.number,
-}
-
-persons = persons.concat(person)
-console.log(person)
-response.json(person)
+})
+person.save().then(savedPerson => {
+  response.json(savedPerson)
 })
 
-const PORT = process.env.PORT || 3001
-app.listen(PORT)
-console.log(`Server running on port ${PORT}`)
+persons = persons.concat(person)
+//console.log(person)
+//response.json(person)
+})
+
+const PORT = process.env.PORT
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+})
